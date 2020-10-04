@@ -1,0 +1,21 @@
+name: CI pipeline
+
+on:
+  push:
+    paths:
+      - '!**.md'
+
+jobs:
+  build:
+    name: Feature tests
+    runs-on: ubuntu-latest
+    steps:
+      -   uses: actions/checkout@v2
+      -   name: Start the test environment
+          run: test/start-test.sh --build --detach
+
+      -   name: Ensure services up and ready
+          run: test/ensure-services-ready.sh
+
+      -   name: Run feature tests
+          run: test/test-features.sh
