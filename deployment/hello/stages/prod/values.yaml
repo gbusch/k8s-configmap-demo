@@ -1,8 +1,8 @@
 image:
-  tag: "02"
+  tag: tag
 
 service:
-  port: 8081
+  port: 8082
 
 helloConfig:
   greeting: Good day,
