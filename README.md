@@ -5,7 +5,7 @@ When bringing an application into production, we often want to go through severa
 Spring Boot allows us to define such properties externally. In this proof-of-concept, we built an example system where:
 * The application can be run and tested locally using docker-compose. Properties for the test-environment are given via a Docker volume mount.
 * The application is tested with a feature-test (using python's behave). This test is fully automatized and included in a github-workflow pipeline which runs at every push.
-* The application can be deployed to Kubernetes via helm. Application properties can be defined in the values.yaml for every stage and are mounted into the container as ConfigMaps.
+* The application can be deployed to Kubernetes via helm. Application properties can be defined in the values.yaml for every stage and are mounted into the container as ConfigMaps or environment variables.
 
 
 ### Prerequisite to run the POC on your machine
@@ -18,11 +18,11 @@ Spring Boot allows us to define such properties externally. In this proof-of-con
 ## Step 1: Develop locally
 The Java application can be started locally with `test/start-test.sh`.
 
-Once it's built and the application is up, you can request a greeting with `curl "localhost:8080?name=<your name>"`.
+Once it's built and the application is up, you can request a greeting with `curl "localhost:8080?name=<your name>"`. Furthermore you can print the stage with `curl localhost:8080/stage`.
 
-The application can be configured via [application.properties](./hello-world/src/main/resources/application.properties) and [application-test.properties](./test/application-test.properties) (while the latter has precedence), a restart is required.
+The application can be configured via [application.properties](./hello-world/src/main/resources/application.properties) and [application-test.properties](./test/application-test.properties) (while the latter has precedence), a restart is required. The stage is set as an environment variable. A default value is set in the Dockerfile which is overwritten in the docker-compose file.
 
-A feature-file can be found in the [feature](./features)-folder and the tests can be run with `test/test-features.sh` (the test-system needs to be running for that, `test/start-test.sh`).
+Feature-files for both requests can be found in the [feature](./features)-folder and the tests can be run with `test/test-features.sh` (the test-system needs to be running for that, `test/start-test.sh`).
 
 
 ## Step 2: Deploy on Kubernetes
@@ -44,10 +44,22 @@ In this example, the services listen on port 8081 for QA and 8082 for production
 To upgrade the service, there are two ways:
 * Upgrade the software: Make changes in the Java code, build a new image (with new tag) and change the tag in the values.yaml.
 * Only change configuration in the values.yaml, for example the greeting that should be used.
+* Change environment variables in the values.yaml. In this example, the "stage" environment variable is printed with the `curl localhost:<port>/stage` request.
 
 After these changes, the new version is deployed with `helm upgrade -f hello/stages/<stage>/values.yaml hello-<stage> hello`.
 
 The delete the deployment, run `helm delete hello-<stage>`. To list all deployments: `helm ls`.
+
+
+### Bonus:
+Configuration from the application.properties can be overwritten with environment variables. Environment variables that should overwrite properties should be uppercase and dots need to be replaced with underscores (cool.property => COOL_PROPERTY).
+
+To try that out, add 
+```
+extraEnvs:
+  GREETING: Salam
+```
+in the stage-specific values.yaml, upgrade the deployment and make a greeting-request.
 
 
 ## Behind the scences:

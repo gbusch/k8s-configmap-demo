@@ -9,4 +9,6 @@ services:
       - 8080:8080
     volumes: 
       - ./test/application-test.properties:/config/application.properties
+    environment: 
+      stage: local
     restart: on-failure

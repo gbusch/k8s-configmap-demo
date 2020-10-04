@@ -1,8 +1,11 @@
 image:
-  tag: tag
+  tag: "1"
 
 service:
   port: 8081
+
+extraEnvs:
+  stage: qa
 
 helloConfig:
   greeting=Hello,

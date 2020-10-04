@@ -4,5 +4,8 @@ image:
 service:
   port: 8082
 
+extraEnvs:
+  stage: prod
+
 helloConfig:
   greeting: Good day,
