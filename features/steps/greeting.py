@@ -4,7 +4,9 @@ from behave import given, then, when
 
 @then("he is greeted with")
 def assert_greeting(context):
-    assert context.result.text == context.text
+    expected = context.text
+    actual = context.result.text
+    assert actual == expected, f"Expected: {expected}, but got: {actual}"
 
 
 @when("he requests a greeting")

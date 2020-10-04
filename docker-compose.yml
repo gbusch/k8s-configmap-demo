@@ -8,5 +8,5 @@ services:
     ports:
       - 8080:8080
     environment:
-      - GREETING=Hallo
+      - GREETING=Hi
     restart: on-failure
