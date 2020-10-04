@@ -16,17 +16,16 @@ Spring Boot allows us to define such properties externally. In this proof-of-con
 
 
 ## Step 1: Develop locally
-The Java application can be started locally with `docker-compose up --build`.
+The Java application can be started locally with `test/start-test.sh`.
 
 Once it's built and the application is up, you can request a greeting with `curl "localhost:8080?name=<your name>"`.
 
 The application can be configured via [application.properties](./hello-world/src/main/resources/application.properties) and [application-test.properties](./test/application-test.properties) (while the latter has precedence), a restart is required.
 
-A feature-file can be found in the [feature](./feature/)-folder and the tests can be run with `test/start-test.sh`.
+A feature-file can be found in the [feature](./features)-folder and the tests can be run with `test/test-features.sh` (the test-system needs to be running for that, `test/start-test.sh`).
 
 
 ## Step 2: Deploy on Kubernetes
-
 To deploy on Kubernetes, we first need to build the Docker image. This can be done with:
 `docker build -f hello-world/Dockerfile -t hello-world:tag .`
 
@@ -38,14 +37,39 @@ Configuration that is stage-specific is set in the [qa/values.yaml](./deployment
 
 Once everything is set as desired, we can deploy the service:
 * `cd deployment`
-* `helm upgrade -f stages/qa/values.yaml hello-qa hello` or `helm upgrade -f stages/prod/values.yaml hello-prod hello`
+* `helm install -f hello/stages/qa/values.yaml hello-qa hello` or `helm install -f hello/stages/prod/values.yaml hello-prod hello`
 
-In this example, the services listen on port 8081 for QA and 8082 for production. In a real case, we might consider to deploy them on different clusters. So we can request a greeting with `curl "localhost:8081?name=<your name>"`.
+In this example, the services listen on port 8081 for QA and 8082 for production. In a real case, we might consider to deploy them on different clusters. So we can request a greeting with `curl "localhost:8081?name=<your name>"` (on my machine it takes a while, you can inspect the status of the pod with `kubectl get pods`).
 
 To upgrade the service, there are two ways:
 * Upgrade the software: Make changes in the Java code, build a new image (with new tag) and change the tag in the values.yaml.
 * Only change configuration in the values.yaml, for example the greeting that should be used.
 
-After these changes, the new version is deployed with `helm upgrade -f stages/<stage>/values.yaml hello-<stage> hello`.
+After these changes, the new version is deployed with `helm upgrade -f hello/stages/<stage>/values.yaml hello-<stage> hello`.
 
 The delete the deployment, run `helm delete hello-<stage>`. To list all deployments: `helm ls`.
+
+
+## Behind the scences:
+* Helm creates a ConfigMap that contains the configuration specified in helloConfig in the values.yaml.
+  * to see all deployed configmaps: `kubectl get configmap`
+  * to see content of "hello-qa" configmap: `kubectl describe configmap hello-qa`
+  * the configmap creates a file application.properties
+* this file is mounted into the container, see [deployment.yaml](./deployment/hello/templates/deployment.yamldeploy):
+  ```
+            volumeMounts:
+            - name: {{ template "hello.fullname" . }}
+              mountPath: /config
+          {{ end }}
+      {{ if .Values.helloConfig }}
+      volumes:
+        - name: {{ template "hello.fullname" . }}
+          configMap:
+            name: {{ template "hello.fullname" . }}
+      {{ end }}
+  ```
+* In the Dockerfile, we specified the following entrypoint:
+  ```
+  ENTRYPOINT ["java","-jar","/app.jar", "--spring.config.location=classpath:/,file:/config/"]
+  ```
+  which means that application.properties which are mounted into the /config folder have precedence over those in the classpath.
