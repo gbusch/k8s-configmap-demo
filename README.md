@@ -55,7 +55,7 @@ The delete the deployment, run `helm delete hello-<stage>`. To list all deployme
   * to see all deployed configmaps: `kubectl get configmap`
   * to see content of "hello-qa" configmap: `kubectl describe configmap hello-qa`
   * the configmap creates a file application.properties
-* this file is mounted into the container, see [deployment.yaml](./deployment/hello/templates/deployment.yamldeploy):
+* this file is mounted into the container, see [deployment.yaml](./deployment/hello/templates/deployment.yaml):
   ```
             volumeMounts:
             - name: {{ template "hello.fullname" . }}

@@ -5,4 +5,4 @@ service:
   port: 8081
 
 helloConfig:
-  greeting=Hiya,
+  greeting=Hello,
