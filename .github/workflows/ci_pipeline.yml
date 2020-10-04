@@ -2,8 +2,8 @@ name: CI pipeline
 
 on:
   push:
-    paths:
-      - '!**.md'
+    paths-ignore:
+      - '**.md'
 
 jobs:
   build:
