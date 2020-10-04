@@ -8,7 +8,7 @@ Feature: Greeting
         When he requests a greeting
         Then he is greeted with
             """
-            Hi Gerold.
+            Hello Gerold!
             """
 
     Scenario: Hello without name.
@@ -16,5 +16,5 @@ Feature: Greeting
         When he requests a greeting
         Then he is greeted with
             """
-            Hi World.
+            Hello World!
             """
