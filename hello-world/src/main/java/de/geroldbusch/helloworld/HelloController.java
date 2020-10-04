@@ -9,9 +9,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class HelloController {
     @Value("${greeting}")
     String greeting;
+    @Value("${punctuation}")
+    String punctuation;
 
     @GetMapping
     public String hello(@RequestParam(defaultValue = "World") String name) {
-        return greeting + " " + name + ".";
+        return greeting + " " + name + punctuation;
     }
 }

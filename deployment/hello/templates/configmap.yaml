@@ -1,0 +1,16 @@
+{{- if .Values.helloConfig }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "hello.fullname" . }}
+  labels:
+    app: {{ template "hello.name" . }}
+    chart: {{ template "hello.chart" . }}
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+data:
+  application.properties: |-
+{{- if .Values.helloConfig }}
+{{ tpl .Values.helloConfig . | indent 4 }}
+{{- end }}
+{{- end }}

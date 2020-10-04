@@ -1,0 +1,8 @@
+image:
+  tag: "03"
+
+service:
+  port: 8080
+
+#helloConfig:
+#  greeting=Hiya,
